@@ -81,25 +81,25 @@ class Main(tk.Frame):
         self.view_records()
 
     def edit_record(self, surname, nam,  patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone):
-        self.db.c.execute('''UPDATE table SET surname=?, nam=?, patronymic=?, citizenship=?, date_of_birth=?, place_of_birth=?, sex=?, profession=?, phone=? WHERE ID=?''',
+        self.db.c.execute('''UPDATE tablica SET surname=?, nam=?, patronymic=?, citizenship=?, date_of_birth=?, place_of_birth=?, sex=?, profession=?, phone=? WHERE ID=?''',
                           (surname, nam, patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone, self.tree.set(self.tree.selection()[0], '#1')))
         self.db.conn.commit()
         self.view_records()
 
     def view_records(self):
-        self.db.c.execute('''SELECT * FROM table''')
+        self.db.c.execute('''SELECT * FROM tablica''')
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.c.fetchall()]
 
     def delete_records(self):
         for selection_item in self.tree.selection():
-            self.db.c.execute('''DELETE FROM table WHERE id=?''', (self.tree.set(selection_item, '#1'),))
+            self.db.c.execute('''DELETE FROM tablica WHERE id=?''', (self.tree.set(selection_item, '#1'),))
         self.db.conn.commit()
         self.view_records()
 
     def search_records(self, surname):
         surname = ('%' + surname + '%',)
-        self.db.c.execute('''SELECT * FROM table WHERE surname LIKE ? ''', surname)
+        self.db.c.execute('''SELECT * FROM tablica WHERE surname LIKE ? ''', surname)
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.c.fetchall()]
 
@@ -217,7 +217,7 @@ class Edit(Child):
         self.btn_ok.destroy()
 
     def default_data(self):
-        self.db.c.execute('''SELECT * FROM table WHERE id=?''',
+        self.db.c.execute('''SELECT * FROM tablica WHERE id=?''',
                           (self.view.tree.set(self.view.tree.selection()[0], '#1'),)) #где[0] - это первый элемент кортежа возвращаемого методом select, а #1- это номер столбца в таблице по порядку, тобишь номер столбца содержащего айдишник
         row = self.db.c.fetchone() #возвращает кортеж значений с нужным ID, причем в питоне номер элемента начинается с 0.
         self.entry_surname.insert(0, row[1]) #вставляем в соответствующее текстовое поле 2ой элемент кортежа тобишь с индексом [1], тобишь на самрм деле это значение 1го столбца
@@ -268,11 +268,11 @@ class DB:
         self.conn = sqlite3.connect('migreg.db')
         self.c = self.conn.cursor()
         self.c.execute(
-            '''CREATE TABLE IF NOT EXISTS table (id integer primary key, surname varchar, nam varchar,  patronymic varchar, citizenship varchar, date_of_birth date, place_of_birth varchar, sex varchar, profession varchar, phone integer) ''')
+            '''CREATE tablica IF NOT EXISTS tablica (id integer primary key, surname varchar, nam varchar,  patronymic varchar, citizenship varchar, date_of_birth date, place_of_birth varchar, sex varchar, profession varchar, phone integer) ''')
         self.conn.commit()
 
     def insert_data(self, surname, nam, patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone):
-        self.c.execute('''INSERT INTO table (surname, nam, patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+        self.c.execute('''INSERT INTO tablica (surname, nam, patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                        (surname, nam, patronymic, citizenship, date_of_birth, place_of_birth, sex, profession, phone))
         self.conn.commit()
 
